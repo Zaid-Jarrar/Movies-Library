@@ -5,7 +5,6 @@
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
-    
   },
   "repository": {
     "type": "git",
@@ -19,7 +18,9 @@
   },
   "homepage": "https://github.com/Zaid-Jarrar/Movies-Library#readme",
   "dependencies": {
+    "axios": "^0.25.0",
     "cors": "^2.8.5",
+    "dotenv": "^15.0.0",
     "express": "^4.17.2"
   }
 }
