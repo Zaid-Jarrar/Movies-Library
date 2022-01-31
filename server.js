@@ -16,19 +16,17 @@ app.get('/favorite',favHandler);
 app.get('*',notFoundHandler);
 
 
-function Movie (title,poster_path,vote_average,overview,release_date){
+function Movie (title,poster_path,overview){
   this.title = title;
   this.posterPath = poster_path;
-  this.vote_average = vote_average;
-  this.release_date = release_date;
   this.overview = overview;
 
 }
 function movieInfoHandler(req,res){
   let moviearray = [];
   movieData.data.forEach(movie => {
-    let oneMovie = new Movie (movie.title,movie.poster_path,movie.vote_average,
-      movie.overview,movie.release_date);
+    let oneMovie = new Movie (movie.title,movie.poster_path,
+      movie.overview);
     moviearray.push(oneMovie);
 
   });
@@ -36,11 +34,11 @@ function movieInfoHandler(req,res){
 }
 
 function favHandler(req,res){
-  return res.status(200).send('Best of the Best List');
+  return res.status(200).send('Welcome to Favorite Page');
 }
 
 function notFoundHandler(req,res){
-  return res.status(404).send('Sorry, can not seem to find it');
+  return res.status(404).send('Sorry, something went wrong');
 }
 
 app.listen(3000,() => {
