@@ -8,7 +8,7 @@
 This a movie website to check out the best movies ever made, old, new, it doesn't matter as long as it's gold.
 
 ## Features:
-they are still a work in progress but we have a favorite list feature already added and more to come................................
+they are still a work in progress but we have a favorite list feature, genre, search,trending,region already added and more to come................................
 ## Getting Started
 To make something like this one must
 
@@ -32,6 +32,7 @@ To make something like this one must
 9) run npm start and see the results
 
 
-
+get API key and urls for the features needed to connect
+make constructors for the urls data and make set the url to a promise and construct them.
 
 
