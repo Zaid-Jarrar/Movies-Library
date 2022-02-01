@@ -6,8 +6,11 @@ const cors = require('cors');
 const PORT = process.env.PORT;
 const app = express();
 const { default: axios } = require('axios'); // used to send requests to other APIs and get the data from
-
+const pg = require('pg'); // will provide us a client
+app.use(express.json());
 app.use(cors());
+
+const client = new pg.Client(process.env.DATABASE_URL);
 
 const movieData = require('./MovieData/data.json');
 
@@ -18,12 +21,17 @@ app.get('/trending',trendingHandler);
 app.get('/search',searchHandler);
 app.get('/genre',genreHandler);
 app.get('/region',regionHandler);
+
+app.post('/addMovie',addMovieHandler);
+app.get('/getMovies',getMoviesHandler);
+
 app.get('*',notFoundHandler); // error from the client
 app.use(errorHandler);// error from the server500
 
+
 const url =`https://api.themoviedb.org/3/trending/movie/day?api_key=${process.env.APIKEY}`;
 
-let urlSearchMovie = `https://api.themoviedb.org/3/search/movie?api_key=${process.env.APIKEY}&language=en-US&query=Spider-Man&page=1-2&include_adult=false&year=2022`;
+let urlSearchMovie = `https://api.themoviedb.org/3/search/movie?api_key=${process.env.APIKEY}&language=en-US&query=Spider-Man&page=1&include_adult=false&year=2022`;
 let urlGenre = `https://api.themoviedb.org/3/genre/movie/list?api_key=${process.env.APIKEY}&language=en-US`;
 let urlRegion = `https://api.themoviedb.org/3/watch/providers/regions?api_key=${process.env.APIKEY}&language=en-US`;
 
@@ -117,13 +125,13 @@ function genreHandler(req,res){
 function searchHandler(req,res){
   axios.get(urlSearchMovie)
     .then((result)=>{
-      // console.log(result.data.results);
+      console.log(result.data.results);
       let movieSearch = result.data.results.map(movie =>{
         return new Search(movie.id,movie.title,movie.release_date,movie.poster_path,movie.overview);
       });
-      res.status(200).json(movieSearch);
+      res.status(200).json(movieSearch); // should be after the then promise so if executed it will do this as well
 
-    }).catch((err) =>{
+    }).catch((err) =>{ //if it was before status200 it may execute the error and the status200 and cause a problem
       errorHandler(err, req, res);
 
     });
@@ -146,8 +154,29 @@ function trendingHandler(req,res){
 }
 
 
+function addMovieHandler(req,res){
+  const movie = req.body;// return * all
+  let sql = 'INSERT INTO favMovies(title,releaseDate,overview,posterPath) VALUES ($1,$2,$3,$4) RETURNING *;';
+  let values =[movie.title,movie.releaseDate,movie.overview,movie.posterPath];
+  client.query(sql,values).then(data => {//here query can only return data if RETURNING * is there!
+    res.status(200).json(data.rows);
+  }).catch(err => {
+    errorHandler(err, req, res);
+  });
 
+}
 
+function getMoviesHandler(req,res){
+  let sql = 'SELECT * FROM favMovies;';
+  client.query(sql).then(data => {// query will return data which is select... 
+    res.status(200).json(data.rows);
+    // let movies = data.rows.map(movie =>{
+    //   return movie
+    // }
+  }).catch(err => {
+    errorHandler(err, req, res);
+  });
+}
 
 
 
@@ -169,9 +198,11 @@ function favHandler(req,res){
 function notFoundHandler(req,res){
   return res.status(404).send('Sorry, something went wrong');
 }
+client.connect().then(()=>{
+  app.listen(PORT,() => {
+    console.log(`listening to port ${PORT}`);
 
-app.listen(PORT,() => {
-  console.log(`listening to port ${PORT}`);
 
-
+  });
 });
+
