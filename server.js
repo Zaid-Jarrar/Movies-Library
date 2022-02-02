@@ -144,7 +144,7 @@ function deleteidHandler(req,res){
   const sql = `DELETE FROM favMovies WHERE id=${id}`;
   client.query(sql).then(()=>{
     res.status(200).send('The movie has been deleted');
-    res.status(204).json({});//empty object to tell the devs about it being deleted
+    // res.status(204).json({});//empty object to tell the devs about it being deleted
   }).catch((err) =>{ //if it was before status200 it may execute the error and the status200 and cause a problem
     errorHandler(err, req, res);
 
