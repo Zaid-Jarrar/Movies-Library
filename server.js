@@ -25,6 +25,12 @@ app.get('/region',regionHandler);
 app.post('/addMovie',addMovieHandler);
 app.get('/getMovies',getMoviesHandler);
 
+
+app.put('/UPDATE/:id',updateidHandler); // notice the : after the /, you can have more than one to update /:name for ex
+app.delete('/DELETE/:id',deleteidHandler);//new
+app.get('/getOneMoive/:id',getOneMovieHandler);
+
+
 app.get('*',notFoundHandler); // error from the client
 app.use(errorHandler);// error from the server500
 
@@ -116,6 +122,49 @@ function genreHandler(req,res){
     });
 }
 
+function updateidHandler(req,res){//new
+  const id = req.params.id;
+  const movie = req.body;
+  const sql = 'UPDATE favMovies SET title = $1,releaseDate = $2,overview = $3,posterPath = $4 WHERE id =$5 RETURNING *;';
+  let values = [movie.title,movie.releaseDate,movie.overview,movie.posterPath,id];
+  client.query(sql,values).then(date=>{
+    res.status(200).json(date.rows);
+  }).catch((err) =>{ //if it was before status200 it may execute the error and the status200 and cause a problem
+    errorHandler(err, req, res);
+
+  });
+
+  // UPDATE favMovies
+  // SET column = value1, column = value2
+  // WHERE condition
+}
+
+function deleteidHandler(req,res){
+  const id = req.params.id;//params is a parameter for the id or anything you want
+  const sql = `DELETE FROM favMovies WHERE id=${id}`;
+  client.query(sql).then(()=>{
+    res.status(200).send('The movie has been deleted');
+    res.status(204).json({});//empty object to tell the devs about it being deleted
+  }).catch((err) =>{ //if it was before status200 it may execute the error and the status200 and cause a problem
+    errorHandler(err, req, res);
+
+  });
+
+}
+
+
+function getOneMovieHandler(req,res){
+  const id = req.params.id;//params is a parameter for the id or anything you want
+  const sql = `SELECT * FROM favMovies WHERE id=${id}`;
+  client.query(sql).then((data)=>{
+    res.status(200).json(data.rows);
+
+  }).catch((err) =>{ //if it was before status200 it may execute the error and the status200 and cause a problem
+    errorHandler(err, req, res);
+
+  });
+
+}
 
 
 
@@ -157,7 +206,7 @@ function trendingHandler(req,res){
 function addMovieHandler(req,res){
   const movie = req.body;// return * all
   let sql = 'INSERT INTO favMovies(title,releaseDate,overview,posterPath) VALUES ($1,$2,$3,$4) RETURNING *;';
-  let values =[movie.title,movie.releaseDate,movie.overview,movie.posterPath];
+  let values =[movie.title || '',movie.releaseDate || '',movie.overview || '',movie.posterPath || ''];
   client.query(sql,values).then(data => {//here query can only return data if RETURNING * is there!
     res.status(200).json(data.rows);
   }).catch(err => {
@@ -168,7 +217,7 @@ function addMovieHandler(req,res){
 
 function getMoviesHandler(req,res){
   let sql = 'SELECT * FROM favMovies;';
-  client.query(sql).then(data => {// query will return data which is select... 
+  client.query(sql).then(data => {// query will return data which is select...
     res.status(200).json(data.rows);
     // let movies = data.rows.map(movie =>{
     //   return movie
