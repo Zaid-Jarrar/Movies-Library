@@ -37,4 +37,12 @@ make constructors for the urls data and make set the url to a promise and constr
 
 
 
-
+### 1. Using our Terminal, with the `psql` client: **PostgreSQL shell**
+- `psql` from the terminal
+- `psql database` to connect directly
+- `psql -f filename.sql` to run a .sql file directly. Works best with a database specified.
+- core shell commands
+  - `\l` - shows all databases
+  - `\c` - connects to a db
+  - `\d` - shows all tables
+  - `\q` - quits
